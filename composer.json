@@ -1,0 +1,19 @@
+{
+    "name": "salehuddin/gravity-forms-printnode",
+    "description": "Gravity Forms to PrintNode thermal label integration",
+    "require": {
+        "dompdf/dompdf": "3.0",
+        "woocommerce/action-scheduler": "3.6"
+    },
+    "authors": [
+        {
+            "name": "Salehuddin",
+            "email": "salehuddin@example.com"
+        }
+    ],
+    "config": {
+        "allow-plugins": {
+            "dealerdirect/phpcodesniffer-composer-installer": true
+        }
+    }
+}
