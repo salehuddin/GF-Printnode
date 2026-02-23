@@ -1,0 +1,39 @@
+name: Build Release ZIP
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.1"
+          tools: composer
+
+      - name: Install Dependencies
+        run: composer install --no-dev --optimize-autoloader
+
+      - name: Build ZIP file
+        run: |
+          # Create a directory named after the plugin slug
+          mkdir -p gravity-forms-printnode
+          # Copy all files into it, excluding development files
+          rsync -av --exclude='.git' --exclude='.github' --exclude='gravity-forms-printnode' --exclude='gravity-forms-printnode.zip' ./ gravity-forms-printnode/
+          # Create the final zip
+          zip -r gravity-forms-printnode.zip gravity-forms-printnode/
+
+      - name: Upload Release Asset
+        uses: softprops/action-gh-release@v2
+        with:
+          files: gravity-forms-printnode.zip
