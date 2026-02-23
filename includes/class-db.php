@@ -44,7 +44,8 @@ class GF_PrintNode_DB {
 		$sql = "CREATE TABLE $table_name (
 			id bigint(20) unsigned NOT NULL auto_increment,
 			entry_id bigint(20) unsigned NOT NULL,
-			guest_name varchar(255) DEFAULT '' NOT NULL,
+			form_id bigint(20) unsigned NOT NULL,
+			identifier varchar(255) DEFAULT '' NOT NULL,
 			printer_id int(11) DEFAULT 0 NOT NULL,
 			status varchar(50) DEFAULT 'queued' NOT NULL,
 			job_id int(11) DEFAULT NULL,
@@ -54,6 +55,7 @@ class GF_PrintNode_DB {
 			updated_at datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP NOT NULL,
 			PRIMARY KEY  (id),
 			KEY entry_id (entry_id),
+			KEY form_id (form_id),
 			KEY status (status)
 		) $charset_collate;";
 
@@ -76,7 +78,8 @@ class GF_PrintNode_DB {
 
 		$defaults = array(
 			'entry_id'   => 0,
-			'guest_name' => '',
+			'form_id'    => 0,
+			'identifier' => '',
 			'printer_id' => 0,
 			'status'     => 'queued',
 			'job_id'     => null,

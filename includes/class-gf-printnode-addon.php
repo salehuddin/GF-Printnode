@@ -175,7 +175,7 @@ class GF_PrintNode_AddOn extends GFFeedAddOn {
 								<h4>Step 3: Map Fields and Select a Printer</h4>
 								<ul style="list-style: disc; padding-left: 20px; margin-bottom: 20px;">
 									<li><strong>Select Printer:</strong> Choose which printer should receive this job. You can also select <em>-- Test Mode --</em> if you just want to preview how the PDF looks without using print quota!</li>
-									<li><strong>Guest Name:</strong> Map a field from your form (e.g., "Name") to help identify the job in your Print Logs dashboard.</li>
+									<li><strong>Identifier:</strong> Map a field from your form (e.g., "Name" or "Entry ID") to help identify the job in your Print Logs dashboard.</li>
 									<li><strong>Label Template:</strong> Use the rich text editor to build your HTML label. <strong>Crucially:</strong> Use the {..} merge tag icon in the editor toolbar to inject dynamic form data directly into your design!</li>
 									<li><strong>PDF Dimensions:</strong> Enter your exact label size in millimeters (e.g., 101.6 x 50.8 for standard 4x2 thermal labels).</li>
 								</ul>
@@ -254,8 +254,8 @@ class GF_PrintNode_AddOn extends GFFeedAddOn {
 						'type'      => 'dynamic_field_map',
 						'field_map' => array(
 							array(
-								'name'     => 'guest_name',
-								'label'    => esc_html__( 'Guest Name', 'gf-printnode' ),
+								'name'     => 'identifier',
+								'label'    => esc_html__( 'Identifier', 'gf-printnode' ),
 								'required' => true,
 							),
 						),
@@ -366,9 +366,9 @@ class GF_PrintNode_AddOn extends GFFeedAddOn {
 
 		$feed_name = $feed['meta']['feedName'];
 
-		// Retrieve mapped guest name value.
+		// Retrieve mapped identifier value.
 		$field_map = $this->get_dynamic_field_map_fields( $feed, 'mappedFields' );
-		$guest_name_val = $this->get_field_value( $form, $entry, $field_map['guest_name'] );
+		$identifier_val = $this->get_field_value( $form, $entry, $field_map['identifier'] );
 
 		// Retrieve HTML Template directly from feed settings.
 		$html_template_raw = rgar( $feed['meta'], 'html_template' );
@@ -393,7 +393,8 @@ class GF_PrintNode_AddOn extends GFFeedAddOn {
 		require_once GF_PRINTNODE_PLUGIN_DIR . 'includes/class-db.php';
 		$log_id = GF_PrintNode_DB::insert_log( array(
 			'entry_id'   => $entry['id'],
-			'guest_name' => substr( $guest_name_val, 0, 255 ),
+			'form_id'    => $form['id'],
+			'identifier' => substr( $identifier_val, 0, 255 ),
 			'printer_id' => $printer_id,
 			'status'     => $is_test_mode ? 'processing' : 'queued', // Test mode can just go to processing
 		) );

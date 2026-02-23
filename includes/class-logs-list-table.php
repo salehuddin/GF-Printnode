@@ -57,7 +57,8 @@ class GF_PrintNode_Logs_List_Table extends WP_List_Table {
 		// Search.
 		if ( isset( $_REQUEST['s'] ) && ! empty( $_REQUEST['s'] ) ) {
 			$search = '%' . $wpdb->esc_like( wp_unslash( $_REQUEST['s'] ) ) . '%';
-			$where .= ' AND ( guest_name LIKE %s OR entry_id LIKE %s OR job_id LIKE %s )';
+			$where .= ' AND ( identifier LIKE %s OR entry_id LIKE %s OR job_id LIKE %s OR form_id LIKE %s )';
+			$args[] = $search;
 			$args[] = $search;
 			$args[] = $search;
 			$args[] = $search;
@@ -73,7 +74,7 @@ class GF_PrintNode_Logs_List_Table extends WP_List_Table {
 		$orderby = isset( $_REQUEST['orderby'] ) ? sanitize_sql_orderby( wp_unslash( $_REQUEST['orderby'] ) ) : 'created_at';
 		$order   = isset( $_REQUEST['order'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['order'] ) ) : 'DESC';
 
-		$allowed_orderby = array( 'id', 'entry_id', 'guest_name', 'printer_id', 'status', 'job_id', 'created_at' );
+		$allowed_orderby = array( 'id', 'entry_id', 'form_id', 'identifier', 'printer_id', 'status', 'job_id', 'created_at' );
 		if ( ! in_array( $orderby, $allowed_orderby, true ) ) {
 			$orderby = 'created_at';
 		}
@@ -115,7 +116,8 @@ class GF_PrintNode_Logs_List_Table extends WP_List_Table {
 			'cb'         => '<input type="checkbox" />',
 			'id'         => esc_html__( 'ID', 'gf-printnode' ),
 			'created_at' => esc_html__( 'Date', 'gf-printnode' ),
-			'guest_name' => esc_html__( 'Guest Name', 'gf-printnode' ),
+			'identifier' => esc_html__( 'Identifier', 'gf-printnode' ),
+			'form_id'    => esc_html__( 'Source Form', 'gf-printnode' ),
 			'entry_id'   => esc_html__( 'Entry ID', 'gf-printnode' ),
 			'printer_id' => esc_html__( 'Printer ID', 'gf-printnode' ),
 			'status'     => esc_html__( 'Status', 'gf-printnode' ),
@@ -133,7 +135,8 @@ class GF_PrintNode_Logs_List_Table extends WP_List_Table {
 		return array(
 			'id'         => array( 'id', false ),
 			'created_at' => array( 'created_at', true ),
-			'guest_name' => array( 'guest_name', false ),
+			'identifier' => array( 'identifier', false ),
+			'form_id'    => array( 'form_id', false ),
 			'entry_id'   => array( 'entry_id', false ),
 			'status'     => array( 'status', false ),
 		);
@@ -154,11 +157,32 @@ class GF_PrintNode_Logs_List_Table extends WP_List_Table {
 			case 'printer_id':
 			case 'job_id':
 				return esc_html( $item[ $column_name ] );
-			case 'guest_name':
+			case 'identifier':
 				return '<strong>' . esc_html( $item[ $column_name ] ) . '</strong>';
 			default:
 				return print_r( $item, true );
 		}
+	}
+
+	/**
+	 * Column: form_id
+	 *
+	 * @param array $item
+	 * @return string
+	 */
+	protected function column_form_id( $item ) {
+		$form_id = absint( $item['form_id'] );
+		$form_title = sprintf( esc_html__( 'Form #%d', 'gf-printnode' ), $form_id );
+		
+		if ( class_exists( 'GFAPI' ) ) {
+			$form = GFAPI::get_form( $form_id );
+			if ( ! empty( $form ) && ! is_wp_error( $form ) ) {
+				$form_title = esc_html( $form['title'] );
+			}
+		}
+
+		$form_url = admin_url( 'admin.php?page=gf_edit_forms&id=' . $form_id );
+		return sprintf( '<a href="%s">%s</a>', esc_url( $form_url ), $form_title );
 	}
 
 	/**
@@ -216,19 +240,22 @@ class GF_PrintNode_Logs_List_Table extends WP_List_Table {
 		
 		$actions = array();
 
-		// View Entry link.
-		$entry_url = admin_url( 'admin.php?page=gf_entries&view=entry&id=' . absint( $item['entry_id'] ) ); // Assuming standard GF entry URL, we missing Form ID here but for simplicity we rely on standard hooks if we need accurate URL, or we let them search. GF uses page=gf_entries&view=entry&id=X which sometimes requires lid=XX but often works if we just link. For safety, let's omit unless we parse Form ID from Entry table.
-		
+		// Details
+		$entry_url = admin_url( 'admin.php?page=gf_entries&view=entry&id=' . absint( $item['entry_id'] ) ); // Assuming standard GF entry URL
+
 		// Let's just create Reprint and View PDF here.
 		
 		$reprint_url = wp_nonce_url( admin_url( 'admin.php?page=gf_printnode_logs&action=reprint&log=' . $item['id'] ), 'reprint_log_' . $item['id'] );
 		
-		$actions['reprint'] = sprintf( '<a href="%s" class="button button-small">%s</a>', esc_url( $reprint_url ), esc_html__( 'Reprint', 'gf-printnode' ) );
+		$actions['reprint'] = sprintf( '<a href="%s" class="button button-small">%s</a>', esc_url( $reprint_url ), esc_html__( 'Reprint/Retry', 'gf-printnode' ) );
 
 		if ( ! empty( $item['pdf_path'] ) && file_exists( $item['pdf_path'] ) ) {
 			$pdf_url = content_url( 'uploads/gf_printnode_previews/' . basename( $item['pdf_path'] ) );
 			$actions['view_pdf'] = sprintf( '<a href="%s" target="_blank" class="button button-small">%s</a>', esc_url( $pdf_url ), esc_html__( 'View PDF', 'gf-printnode' ) );
 		}
+
+		$delete_url = wp_nonce_url( admin_url( 'admin.php?page=gf_printnode_logs&action=delete_single&log=' . $item['id'] ), 'delete_single_log_' . $item['id'] );
+		$actions['delete'] = sprintf( '<a href="%s" class="button button-small" style="color: #d63638; border-color: #d63638;" onclick="return confirm(\'%s\');">%s</a>', esc_url( $delete_url ), esc_attr__( 'Are you sure you want to delete this log?', 'gf-printnode' ), esc_html__( 'Delete', 'gf-printnode' ) );
 
 		return join( ' ', $actions );
 	}
@@ -265,6 +292,23 @@ class GF_PrintNode_Logs_List_Table extends WP_List_Table {
 				$this->trigger_reprint( array( $log_id ) );
 				
 				wp_safe_redirect( add_query_arg( 'reprinted', 1, admin_url( 'admin.php?page=gf_printnode_logs' ) ) );
+				exit;
+			}
+		}
+
+		if ( 'delete_single' === $action ) {
+			$log_id = isset( $_REQUEST['log'] ) ? absint( $_REQUEST['log'] ) : 0;
+			if ( $log_id ) {
+				check_admin_referer( 'delete_single_log_' . $log_id );
+				require_once GF_PRINTNODE_PLUGIN_DIR . 'includes/class-db.php';
+				global $wpdb;
+				$log = GF_PrintNode_DB::get_log( $log_id );
+				if ( $log && ! empty( $log->pdf_path ) && file_exists( $log->pdf_path ) ) {
+					@unlink( $log->pdf_path );
+				}
+				$wpdb->delete( $wpdb->prefix . GF_PrintNode_DB::TABLE_LOGS, array( 'id' => $log_id ) );
+				
+				wp_safe_redirect( add_query_arg( 'deleted', 1, admin_url( 'admin.php?page=gf_printnode_logs' ) ) );
 				exit;
 			}
 		}

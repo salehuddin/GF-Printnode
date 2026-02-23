@@ -66,7 +66,7 @@ class GF_PrintNode_Background_Process {
 
 		// Submit to PrintNode.
 		$printer_id = $log->printer_id;
-		$title = sprintf( 'GF Print: %s (Entry #%d)', $log->guest_name, $log->entry_id );
+		$title = sprintf( 'GF Print: %s (Entry #%d)', $log->identifier, $log->entry_id );
 
 		if ( $printer_id !== -1 ) {
 			$api = new GF_PrintNode_API();

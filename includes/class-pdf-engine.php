@@ -182,7 +182,7 @@ class GF_PrintNode_PDF_Engine {
 			wp_mkdir_p( $preview_dir );
 			// Add an index.php and .htaccess for basic directory protection.
 			file_put_contents( $preview_dir . '/index.php', '<?php // Silence is golden.' );
-			file_put_contents( $preview_dir . '/.htaccess', 'Options -Indexes' );
+			file_put_contents( $preview_dir . '/.htaccess', "Options -Indexes\nDeny from all" );
 		}
 
 		$file_name = 'preview_log_' . $log_id . '_' . wp_generate_password( 8, false ) . '.pdf';

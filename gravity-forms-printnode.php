@@ -77,6 +77,9 @@ final class GF_PrintNode_Core {
 	 * Init the plugin classes on plugins_loaded.
 	 */
 	public function init() {
+		// Load plugin text domain.
+		load_plugin_textdomain( 'gf-printnode', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
+
 		// Ensure GF is active.
 		if ( ! class_exists( 'GFForms' ) ) {
 			return;
@@ -141,7 +144,7 @@ final class GF_PrintNode_Core {
 	/**
 	 * Plugin deactivation routine.
 	 */
-	public function deactivation() {
+	public function deactivate() {
 		// Clear scheduled actions.
 		if ( class_exists( 'ActionScheduler' ) ) {
 			ActionScheduler_QueueCleaner::clean_clean_actions();
