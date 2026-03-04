@@ -414,7 +414,7 @@ class GF_PrintNode_AddOn extends GFFeedAddOn {
 				'feed_name'      => $feed_name,
 			);
 			
-			$action_id = as_enqueue_async_action( 'gform_printnode_process_job', $args );
+			$action_id = as_enqueue_async_action( 'gform_printnode_process_job', array( $args ) );
 			$this->log_debug( "GF_PrintNode_AddOn::process_feed(): Scheduled background job Action ID #{$action_id} for Log ID #{$log_id}." );
 		} else {
 			$this->log_error( "GF_PrintNode_AddOn::process_feed(): Action Scheduler is missing. Cannot enqueue job." );

@@ -4,7 +4,7 @@ Tags: gravity forms, printnode, thermal printing, pdf generation
 Requires at least: 5.8
 Tested up to: 6.4
 Requires PHP: 7.4
-Stable tag: 1.0.0
+Stable tag: 1.0.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -34,6 +34,10 @@ Yes, you will need an active PrintNode account and an API key to communicate wit
 2. Feed Settings Configuration
 
 == Changelog ==
+
+= 1.0.1 =
+* Fix: Action Scheduler args wrapping bug that caused print jobs to remain stuck in "Queued" status and never be sent to PrintNode.
+* Fix: PDF preview directory .htaccess was blocking file access with "Deny from all", causing "View PDF" links to return 403 errors.
 
 = 1.0.0 =
 * Initial release.

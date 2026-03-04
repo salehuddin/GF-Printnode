@@ -2,7 +2,7 @@
 /**
  * Plugin Name:       Gravity Forms Smart Print & Tracker (PrintNode)
  * Description:       Self-contained plugin that generates PDF labels from GF submissions and sends them to PrintNode. Includes a tracking dashboard.
- * Version:           1.0.0
+ * Version:           1.0.1
  * Author:            Salehuddin
  * Text Domain:       gf-printnode
  *
@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Define plugin constants.
-define( 'GF_PRINTNODE_VERSION', '1.0.0' );
+define( 'GF_PRINTNODE_VERSION', '1.0.1' );
 define( 'GF_PRINTNODE_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'GF_PRINTNODE_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 define( 'GF_PRINTNODE_PLUGIN_FILE', __FILE__ );
